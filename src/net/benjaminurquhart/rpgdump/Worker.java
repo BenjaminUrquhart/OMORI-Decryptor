@@ -55,6 +55,7 @@ public class Worker extends SwingWorker<Void, Void> {
 					else {
 						ui.mods.forEach(ui::remove);
 						ui.layout.setRows(6);
+						ui.mods.clear();
 					}
 					ui.revalidate();
 					Main.frame.pack();

@@ -138,6 +138,7 @@ public class UI extends JPanel implements ActionListener {
 		mods.forEach(this::remove);
 		layout.setRows(6);
 		Main.frame.pack();
+		mods.clear();
 		
 		Toolkit.getDefaultToolkit().beep();
 		
