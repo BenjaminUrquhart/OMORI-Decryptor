@@ -4,17 +4,25 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JProgressBar;
+
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -37,7 +45,6 @@ public class OmoriUtil {
 			if(!steamAppInfo.exists()) {
 				throw new IllegalStateException("Steam not installed");
 			}
-			
 			System.out.println("Attempting to pull key from Steam appinfo...");
 			System.out.println("File: " + steamAppInfo.getAbsolutePath());
 			
@@ -70,8 +77,80 @@ public class OmoriUtil {
 			System.out.println("Found decryption key.");
 			decryptionKey = candidate;
 		}
+		
 		OmoriUtil.decryptionKey = decryptionKey;
 		OmoriUtil.folder = folder;
+	}
+	
+	private static List<ZipEntry> getZipEntriesWithExts(ZipFile file, String... exts) {
+		return file.stream()
+				   .filter(entry -> !entry.isDirectory())
+				   .filter(entry -> {
+					   for(String ext : exts) {
+						   if(entry.getName().endsWith(ext)) {
+							   return true;
+						   }
+					   }
+					   return false;
+				   }).collect(Collectors.toList());
+	}
+	
+	public static Set<String> getDetectedMods() {
+		Set<String> out = new HashSet<>(), seen = new HashSet<>();
+		File modFolder = new File(RPGMakerUtil.getRootAssetFolder(), "mods");
+		File gomoriFolder = new File(RPGMakerUtil.getRootAssetFolder(), "gomori");
+		
+		if(modFolder.exists() && gomoriFolder.exists()) {
+			List<File> looseMods = Main.getFilesWithExts(modFolder, null, "mod.json");
+			List<File> compressedMods = Main.getFilesWithExts(modFolder, null, ".zip");
+			
+			List<ZipEntry> compressedEntries;
+			
+			StringBuilder sb = new StringBuilder();
+			InputStream stream;
+			JSONObject config;
+			String json;
+			int b;
+			
+			for(File mod : looseMods) {
+				System.out.println(mod.getAbsolutePath());
+				try {
+					json = Files.readString(mod.toPath());
+					//System.out.println(json);
+					config = new JSONObject(json);
+					if(seen.add(config.optString("id"))) {
+						out.add(String.format("%s v%s (%s)", config.optString("name", mod.getName()), config.optString("version", "???"), config.optString("id", mod.getName())));
+					}
+				}
+				catch(Exception e) {
+					e.printStackTrace(System.out);
+				}
+			}
+			
+			for(File mod : compressedMods) {
+				try(ZipFile zip = new ZipFile(mod)) {
+					compressedEntries = getZipEntriesWithExts(zip, "mod.json");
+					for(ZipEntry entry : compressedEntries) {
+						System.out.println(mod.getAbsolutePath() + ":" + entry.getName());
+						sb.delete(0, sb.length());
+						stream = zip.getInputStream(entry);
+						while((b = stream.read()) != -1) {
+							sb.append((char)b);
+						}
+						stream.close();
+						//System.out.println(sb);
+						config = new JSONObject(sb.toString());
+						if(seen.add(config.optString("id"))) {
+							out.add(String.format("%s v%s (%s)", config.optString("name", mod.getName()), config.optString("version", "???"), config.optString("id", mod.getName())));
+						}
+					}
+				}
+				catch(Exception e) {
+					e.printStackTrace(System.out);
+				}
+			}
+		}
+		return out;
 	}
 
 	public static void decrypt() throws Exception {
@@ -80,7 +159,7 @@ public class OmoriUtil {
 		
 		if(decryptionKey != null) {
 			System.out.println("Finding files to decrypt...");
-			List<File> files = Main.getFilesWithExts(folder, ".OMORI", ".AUBREY", ".PLUTO", ".HERO", ".KEL");
+			List<File> files = Main.getFilesWithExts(folder, RPGMakerUtil.defaultExclusions, ".OMORI", ".AUBREY", ".PLUTO", ".HERO", ".KEL");
 			if(files.isEmpty()) {
 				System.out.println("Nothing found!");
 			}

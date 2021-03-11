@@ -15,6 +15,8 @@ import org.json.JSONObject;
 
 public class RPGMakerUtil {
 	
+	public static List<File> defaultExclusions;
+	
 	private static File folder, root;
 	private static List<File> files;
 	private static String gameName;
@@ -33,15 +35,11 @@ public class RPGMakerUtil {
 		JSONObject info = new JSONObject(Files.readString(pkgInfo.toPath()));
 		String name = info.optString("name", "???");
 		System.out.println("Game: " + name);
-		
 		gameName = name;
-		files = Main.getFilesWithExts(folder, ".rpgmvp", ".rpgmvo");
-		System.out.println(files.size() + " obfuscated file(s) found.");
-		
-		findObfuscationKey();
-		if(keyBytes == null) {
-			throw new IllegalArgumentException("RPG Maker key not found");
-		}
+		defaultExclusions = Arrays.asList(
+				new File(getRootAssetFolder(), "gomori"),
+				new File(getRootAssetFolder(), "mods")
+		);
 	}
 	
 	public static String getGameName() {
@@ -49,6 +47,14 @@ public class RPGMakerUtil {
 	}
 	
 	public static void deobfuscateGame() throws Exception {
+		files = Main.getFilesWithExts(folder, defaultExclusions, ".rpgmvp", ".rpgmvo");
+		System.out.println(files.size() + " obfuscated file(s) found.");
+		
+		findObfuscationKey();
+		if(keyBytes == null) {
+			throw new IllegalArgumentException("RPG Maker key not found");
+		}
+		
 		int index = 1;
 		byte[] bytes;
 		for(File file : files) {

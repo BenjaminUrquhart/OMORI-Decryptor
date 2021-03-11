@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -103,14 +105,17 @@ public class Main {
 		return Arrays.copyOfRange(bytes, 16, bytes.length);
 	}
 	
-	public static List<File> getFilesWithExts(File folder, String... exts) {
-		List<File> out = new ArrayList<>();
+	public static List<File> getFilesWithExts(File folder, Collection<File> excludedDirs, String... exts) {
+		if(excludedDirs != null && excludedDirs.contains(folder)) {
+			return Collections.emptyList();
+		}
 		
+		List<File> out = new ArrayList<>();
 		String name;
 		
 		for(File file : folder.listFiles()) {
 			if(file.isDirectory()) {
-				out.addAll(getFilesWithExts(file, exts));
+				out.addAll(getFilesWithExts(file, excludedDirs, exts));
 			}
 			else {
 				name = file.getName();

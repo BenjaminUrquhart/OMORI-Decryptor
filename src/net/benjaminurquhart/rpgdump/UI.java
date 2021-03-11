@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -20,6 +22,8 @@ public class UI extends JPanel implements ActionListener {
 	
 	private static final long serialVersionUID = -8751465600892495447L;
 	
+	public List<JLabel> mods;
+	public GridLayout layout;
 	public JLabel source, dest;
 	public JProgressBar progressBar;
 	public JButton folderSelectButton, outputSelectButton, startButton;
@@ -36,6 +40,7 @@ public class UI extends JPanel implements ActionListener {
 	}
 	
 	private UI() {
+		mods = new ArrayList<>();
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
 		progressBar.setString("");
@@ -62,7 +67,8 @@ public class UI extends JPanel implements ActionListener {
 		source = new JLabel(sourceFolder, JLabel.CENTER);
 		dest = new JLabel(new File("output").getAbsolutePath(), JLabel.CENTER);
 		
-		setLayout(new GridLayout(6, 1));
+		layout = new GridLayout(6, 1);
+		setLayout(layout);
 		
 		add(source);
 		add(folderSelectButton);
@@ -129,6 +135,10 @@ public class UI extends JPanel implements ActionListener {
 	}
 	
 	public void onError(Throwable e) {
+		mods.forEach(this::remove);
+		layout.setRows(6);
+		Main.frame.pack();
+		
 		Toolkit.getDefaultToolkit().beep();
 		
 		startButton.setEnabled(true);
