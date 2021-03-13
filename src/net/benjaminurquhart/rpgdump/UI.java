@@ -8,12 +8,15 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.filechooser.FileFilter;
@@ -140,16 +143,30 @@ public class UI extends JPanel implements ActionListener {
 		Main.frame.pack();
 		mods.clear();
 		
-		Toolkit.getDefaultToolkit().beep();
+		if(e != null) {
+			
+			e.printStackTrace(System.out);
+			Toolkit.getDefaultToolkit().beep();
+			progressBar.setString("Internal error");
+			JOptionPane.showMessageDialog(
+					null, 
+					"An internal error has occured.\nPlease join the OMORI community Discord server and report this to _creepersbane#2074:\n" 
+					+ e.toString() 
+					+ "\n" + Arrays.stream(e.getStackTrace()).map(String::valueOf).collect(Collectors.joining("\n\t")), 
+					"Internal error", 
+					JOptionPane.ERROR_MESSAGE
+			);
+		}
+		else {
+			progressBar.setString("");
+		}
 		
 		startButton.setEnabled(true);
 		folderSelectButton.setEnabled(true);
 		outputSelectButton.setEnabled(true);
-		e.printStackTrace(System.out);
 		
 		Main.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		progressBar.setIndeterminate(false);
-		progressBar.setString(e.getMessage());
 		progressBar.setValue(0);
 	}
 }

@@ -10,19 +10,18 @@ import javax.imageio.ImageIO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-@Deprecated
 public class SpriteAtlasParser {
 
 	@SuppressWarnings("unchecked")
 	public static void parseSpritesFromAtlas(File folder) throws Exception {
-		File atlasFile = new File(Main.outFolder, "output/data/Atlas.yaml");
+		File atlasFile = new File(Main.outFolder, "data/Atlas.yaml");
 		if(atlasFile.exists()) {
 			System.out.println("Attempting to parse spritesheet atlas...");
 			ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 			
 			Map<String, Map<String, Object>> atlas = ((Map<String, Map<String, Map<String, Object>>>)mapper.readValue(atlasFile, HashMap.class)).get("source");
 			
-			File outDir = new File(Main.outFolder, "output/parsed_sprites_from_atlas");
+			File outDir = new File(Main.outFolder, "parsed_sprites_from_atlas");
 			outDir.mkdirs();
 			
 			Map<String, BufferedImage> textures = new HashMap<>();
@@ -38,13 +37,13 @@ public class SpriteAtlasParser {
 				outFile = new File(outDir, entry.getKey());
 				outFile.getParentFile().mkdirs();
 				atlasEntry = entry.getValue();
-				texture = textures.computeIfAbsent("output/img/atlases/" + atlasEntry.get("atlasName") + ".png", source -> {
+				texture = textures.computeIfAbsent("img/atlases/" + atlasEntry.get("atlasName") + ".png", source -> {
 					try {
 						File file = new File(Main.outFolder, source);
 						if(file.exists()) {
 							return ImageIO.read(file);
 						}
-						System.out.println("\u001b[1000D\u001b[2KAtlas not found: " + file.getName());
+						System.out.println("Atlas not found: " + file.getName());
 					}
 					catch(Exception e) {
 						e.printStackTrace(System.out);
@@ -64,9 +63,9 @@ public class SpriteAtlasParser {
 					width = sourceRect.get("width");
 					height = sourceRect.get("height");
 					if(x < 0 || y < 0 || x + width > texture.getWidth() || y + height > texture.getHeight()) {
-						System.out.println("\u001b[1000D\u001b[2KError: invalid rect for " + outFile.getName() + ": coordinates and dimensions go out of bounds");
-						System.out.printf("\u001b[1000D\u001b[2KRect:        {x: %d, y: %d, w: %d, h: %d}\n", x, y, width, height);
-						System.out.printf("\u001b[1000D\u001b[2KSpritesheet: {x: %d, y: %d, w: %d, h: %d}\n", 0, 0, texture.getWidth(), texture.getHeight());
+						System.out.println("Error: invalid rect for " + outFile.getName() + ": coordinates and dimensions go out of bounds");
+						System.out.printf("Rect:        {x: %d, y: %d, w: %d, h: %d}\n", x, y, width, height);
+						System.out.printf("Spritesheet: {x: %d, y: %d, w: %d, h: %d}\n", 0, 0, texture.getWidth(), texture.getHeight());
 						continue;
 					}
 					output = texture.getSubimage(x, y, width, height);
@@ -80,7 +79,7 @@ public class SpriteAtlasParser {
 			//System.out.println(atlas);
 		}
 		else {
-			System.out.println("\u001b[1000D\u001b[2KNo atlas found, skipping spritesheet parsing.");
+			System.out.println("No atlas found, skipping spritesheet parsing.");
 		}
 	}
 }

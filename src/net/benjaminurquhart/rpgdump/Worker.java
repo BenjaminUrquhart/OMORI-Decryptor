@@ -36,7 +36,21 @@ public class Worker extends SwingWorker<Void, Void> {
 			Main.outFolder = new File(ui.dest.getText());
 			Main.outFolder.mkdirs();
 			
-			RPGMakerUtil.init(folder);
+			try {
+				RPGMakerUtil.init(folder);
+			}
+			catch(IllegalArgumentException e) {
+				JOptionPane.showMessageDialog(
+						null, 
+						"Not an RPGMaker game folder",
+						"Load error", 
+						JOptionPane.ERROR_MESSAGE
+				);
+				e.printStackTrace(System.out);
+				UI.getInstance().onError(null);
+				exit = false;
+				return null;
+			}
 			RPGMakerUtil.deobfuscateGame();
 			
 			if(RPGMakerUtil.getGameName().equals("OMORI")) {
@@ -82,6 +96,8 @@ public class Worker extends SwingWorker<Void, Void> {
 					);
 					e.printStackTrace(System.out);
 				}
+				
+				//SpriteAtlasParser.parseSpritesFromAtlas(folder);
 			}
 		}
 		catch(Throwable e) {

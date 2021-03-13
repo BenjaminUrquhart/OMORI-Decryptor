@@ -130,4 +130,8 @@ public class Main {
 		
 		return out;
 	}
+	
+	public static String readString(File file) throws Exception {
+		return new String(Files.readAllBytes(file.toPath()), "utf-8");
+	}
 }

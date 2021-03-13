@@ -29,10 +29,10 @@ public class RPGMakerUtil {
 		File pkgInfo = new File(getRootAssetFolder(), "package.json");
 		System.out.println(pkgInfo.getAbsolutePath());
 		if(!pkgInfo.exists()) {
-			throw new IllegalArgumentException("Invalid OMORI folder");
+			throw new IllegalArgumentException("Invalid RPGMaker game folder");
 		}
 		
-		JSONObject info = new JSONObject(Files.readString(pkgInfo.toPath()));
+		JSONObject info = new JSONObject(Main.readString(pkgInfo));
 		String name = info.optString("name", "???");
 		System.out.println("Game: " + name);
 		gameName = name;
@@ -57,10 +57,12 @@ public class RPGMakerUtil {
 		
 		int index = 1;
 		byte[] bytes;
+		File backup;
 		for(File file : files) {
 			try {
 				Main.updateProgressBar("Deobfuscating", file.getName(), index, files.size());
-				bytes = Main.getTrimmedFile(file);
+				backup = new File(file.getName() + ".BASIL");
+				bytes = Main.getTrimmedFile(backup.exists() ? backup : file);
 				
 				// Only the first 16 bytes of the file are XORed
 				// because yes.
@@ -91,7 +93,7 @@ public class RPGMakerUtil {
 		keyBytes = new byte[16];
 		
 		if(system.exists()) {
-			JSONObject json = new JSONObject(Files.readString(system.toPath()));
+			JSONObject json = new JSONObject(Main.readString(system));
 			key = json.optString("encryptionKey", null);
 		}
 		else {
@@ -140,8 +142,7 @@ public class RPGMakerUtil {
 			long rem = other & ((1L << 40) - 1);
 			
 			if(signature != 0x5250474d56000000L) {
-				System.out.println("Not an RPG Maker obfuscated file.");
-				throw new IllegalStateException("Internal error");
+				throw new IllegalStateException("Not an RPG Maker obfuscated file.");
 			}
 			
 			buff.position(0);

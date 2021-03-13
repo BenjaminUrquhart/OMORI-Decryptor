@@ -23,3 +23,6 @@ dependencies {
 	compile 'org.json:json:20201115'
 }
 
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+

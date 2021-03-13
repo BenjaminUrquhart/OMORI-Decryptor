@@ -115,7 +115,7 @@ public class OmoriUtil {
 			for(File mod : looseMods) {
 				System.out.println(mod.getAbsolutePath());
 				try {
-					json = Files.readString(mod.toPath());
+					json = Main.readString(mod);
 					//System.out.println(json);
 					config = new JSONObject(json);
 					if(seen.add(config.optString("id"))) {
@@ -171,15 +171,16 @@ public class OmoriUtil {
 				SecretKeySpec spec = new SecretKeySpec(secret, "AES");
 				Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
 				
-				ObjectMapper mapper;				
+				ObjectMapper mapper;
+				File normal, backup;
 				String tmpJson;
-				File normal;
 				
 				int index = 1;
 				for(File file : files) {
 					try {
 						Main.updateProgressBar("Decrypting", file.getName(), index++, files.size());
-						bytes = Files.readAllBytes(file.toPath());
+						backup = new File(file.getName() + ".BASIL");
+						bytes = Files.readAllBytes(backup.exists() ? backup.toPath() : file.toPath());
 						
 						iv = Arrays.copyOfRange(bytes, 0, 16);
 						bytes = Arrays.copyOfRange(bytes, 16, bytes.length);
@@ -235,4 +236,6 @@ public class OmoriUtil {
 		byte[] hash = digest.digest(String.valueOf(string).getBytes("utf-8"));
 		return Main.bytesToHexString(hash);
 	}
+	
+
 }
