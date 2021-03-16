@@ -133,7 +133,10 @@ public class RPGMakerUtil {
 			
 			bytes = Files.readAllBytes(candidate.toPath());
 			ByteBuffer buff = ByteBuffer.wrap(bytes), keyBuff = ByteBuffer.wrap(keyBytes);
+			keyBuff.order(ByteOrder.BIG_ENDIAN);
 			buff.order(ByteOrder.BIG_ENDIAN);
+			keyBuff.mark();
+			buff.mark();
 			
 			long signature = buff.getLong();
 			long other = buff.getLong();
@@ -145,7 +148,7 @@ public class RPGMakerUtil {
 				throw new IllegalStateException("Not an RPG Maker obfuscated file.");
 			}
 			
-			buff.position(0);
+			buff.reset();
 			
 			StringBuilder sb = new StringBuilder();
 			byte b = buff.get();
@@ -159,14 +162,13 @@ public class RPGMakerUtil {
 			
 			bytes = Arrays.copyOfRange(bytes, 16, bytes.length);
 			buff = ByteBuffer.wrap(bytes);
-			
+			buff.mark();
 			
 			System.out.println("Trimmed size: " + bytes.length + " bytes");
-			keyBuff.order(ByteOrder.BIG_ENDIAN);
 			buff.order(ByteOrder.BIG_ENDIAN);
 			
-			keyBuff.position(0);
-			buff.position(0);
+			keyBuff.reset();
+			buff.reset();
 			
 			// Known PNG header segments
 			final int HEADER_1 = 0x89504e47, HEADER_2 = 0x0d0a1a0a, HEADER_4 = 0x49484452;
