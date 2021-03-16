@@ -135,55 +135,27 @@ public class RPGMakerUtil {
 			ByteBuffer buff = ByteBuffer.wrap(bytes), keyBuff = ByteBuffer.wrap(keyBytes);
 			keyBuff.order(ByteOrder.BIG_ENDIAN);
 			buff.order(ByteOrder.BIG_ENDIAN);
-			keyBuff.mark();
-			buff.mark();
 			
-			long signature = buff.getLong();
-			long other = buff.getLong();
-			
-			long ver = other >> 40;
-			long rem = other & ((1L << 40) - 1);
-			
-			if(signature != 0x5250474d56000000L) {
+			if(buff.getLong() != 0x5250474d56000000L) {
 				throw new IllegalStateException("Not an RPG Maker obfuscated file.");
 			}
 			
-			buff.reset();
-			
-			StringBuilder sb = new StringBuilder();
-			byte b = buff.get();
-			
-			while(b != 0) {
-				sb.append((char)b);
-				b = buff.get();
-			}
-			
-			System.out.printf("Header: %08x%08x (%s v%d, r%d)\n", signature, other, sb, ver, rem);
-			
 			bytes = Arrays.copyOfRange(bytes, 16, bytes.length);
 			buff = ByteBuffer.wrap(bytes);
-			buff.mark();
 			
 			System.out.println("Trimmed size: " + bytes.length + " bytes");
 			buff.order(ByteOrder.BIG_ENDIAN);
 			
-			keyBuff.reset();
-			buff.reset();
-			
 			// Known PNG header segments
 			final int HEADER_1 = 0x89504e47, HEADER_2 = 0x0d0a1a0a, HEADER_4 = 0x49484452;
-			keyBuff.mark();
-			buff.mark();
 			
 			// Prepare for brute-force
-			keyBuff.putInt(buff.getInt() ^ HEADER_1);
-			keyBuff.putInt(buff.getInt() ^ HEADER_2);
+			keyBuff.putInt(0, buff.getInt() ^ HEADER_1);
+			keyBuff.putInt(4, buff.getInt() ^ HEADER_2);
 			keyBuff.putInt(12, buff.getInt(12) ^ HEADER_4);
 			
-			buff.reset();
-			
-			buff.putInt(HEADER_1);
-			buff.putInt(HEADER_2);
+			buff.putInt(0, HEADER_1);
+			buff.putInt(4, HEADER_2);
 			buff.putInt(12, HEADER_4);
 			
 			InputStream stream = new ByteArrayInputStream(bytes);
