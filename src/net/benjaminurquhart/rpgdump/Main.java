@@ -71,9 +71,8 @@ public class Main {
 		String name = file.getName();
 		String path = file.getParent() + "/";
 		String root = folder.getAbsolutePath();
-		String assetRoot = RPGMakerUtil.getRootAssetFolder().getAbsolutePath();
 		if(path.startsWith(root)) {
-			path = outFolder.getAbsolutePath() + "/" + path.replaceFirst(Pattern.quote(assetRoot), "");
+			path = outFolder.getAbsolutePath() + "/" + path.replaceFirst(Pattern.quote(root), "");
 			if(created.add(path)) {
 				new File(path).mkdirs();
 			}

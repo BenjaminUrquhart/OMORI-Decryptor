@@ -29,7 +29,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class OmoriUtil {
 	
+	public static final String OLD_KEY_HASH = "06494167914dab96fc9e58b5e2ee9eb98ad230edd6048d2134b8e18a0726f7c4";
 	public static final String KEY_HASH = "b1d50d2686248fc493b71cd490cb88ac75e71caff236fdb4ab9fa78a36319e11";
+	
 	public static final Pattern KEY_PATTERN = Pattern.compile("\\-\\-([0-9a-f]{32})");
 	
 	private static File folder;
@@ -40,7 +42,31 @@ public class OmoriUtil {
 		progressBar.setIndeterminate(true);
 		progressBar.setString("Initializing decryptor...");
 		
-		if(!hash(decryptionKey).equals(KEY_HASH)) {
+		String hash = hash(decryptionKey);
+		
+		// Check for 1.0.0
+		if(!hash.equals(OLD_KEY_HASH)) {
+			File mainjs = new File(RPGMakerUtil.getRootAssetFolder(), "js/main.js");
+			
+			if(mainjs.exists()) {
+				String js = Files.lines(mainjs.toPath()).collect(Collectors.joining("\n"));
+				if(js.contains("let key=")) {
+					decryptionKey = js.split("let key='")[1].split("';", 2)[0];
+					
+					if(hash(decryptionKey).equals(OLD_KEY_HASH)) {
+						System.out.println("OMORI 1.0.0 decryption key found");
+						OmoriUtil.decryptionKey = decryptionKey;
+						OmoriUtil.folder = folder;
+						return;
+					}
+					else {
+						throw new IllegalStateException("Invalid OMORI 1.0.0 decryption key?");
+					}
+				}
+			}
+		}
+		
+		if(!hash.equals(KEY_HASH)) {
 			File steamAppInfo = new File(RPGMakerUtil.getSteamFolder(), "appcache/appinfo.vdf");
 			if(!steamAppInfo.exists()) {
 				throw new IllegalStateException("Steam not installed");
