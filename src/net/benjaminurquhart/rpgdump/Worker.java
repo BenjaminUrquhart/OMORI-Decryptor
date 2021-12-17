@@ -17,7 +17,7 @@ public class Worker extends SwingWorker<Void, Void> {
 	
 	public Worker(File folder) throws FileNotFoundException {
 		if(!folder.exists()) {
-			throw new FileNotFoundException("Folder not found:" + folder.getAbsolutePath());
+			throw new FileNotFoundException("Folder not found: " + folder.getAbsolutePath());
 		}
 		if(!folder.isDirectory()) {
 			throw new IllegalArgumentException("Provided path is not a folder: " + folder.getAbsolutePath());
@@ -72,17 +72,10 @@ public class Worker extends SwingWorker<Void, Void> {
 						ui.mods.clear();
 					}
 					ui.revalidate();
-					Main.frame.pack();
 					
-					/*
 					if(!mods.isEmpty()) {
-						JOptionPane.showMessageDialog(
-								null, 
-								"Note: Mods were detected.\nIt is possible that some of their assets will be decrypted or deobfuscated.\nIf so, they will be located in a seperate folder to avoid conflicts with the base game.", 
-								"Mods detected", 
-								JOptionPane.INFORMATION_MESSAGE
-						);
-					}*/
+						Main.frame.pack();
+					}
 					
 					OmoriUtil.decrypt();
 				}
@@ -90,7 +83,8 @@ public class Worker extends SwingWorker<Void, Void> {
 					Toolkit.getDefaultToolkit().beep();
 					JOptionPane.showMessageDialog(
 							null, 
-							"Failed to decrypt OMORI. Music, images, and video are still available.",
+							"Failed to decrypt OMORI. Music, images, and video are still available.\n" +
+							e.getClass().getName() + ": " + e.getMessage(),
 							"Decryption error", 
 							JOptionPane.ERROR_MESSAGE
 					);

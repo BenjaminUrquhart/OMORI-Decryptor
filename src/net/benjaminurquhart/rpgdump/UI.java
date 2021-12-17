@@ -120,7 +120,7 @@ public class UI extends JPanel implements ActionListener {
 		case "dest": {
 			if(fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
-				if(file.canWrite()) {
+				if(!file.exists() || file.canWrite()) {
 					if(event.getActionCommand().equals("source")) {
 						source.setText(file.getAbsolutePath());
 					}

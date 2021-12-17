@@ -29,6 +29,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class OmoriUtil {
 	
+	// These are not the decryption keys.
+	// Buy the game genius.
 	public static final String OLD_KEY_HASH = "06494167914dab96fc9e58b5e2ee9eb98ad230edd6048d2134b8e18a0726f7c4";
 	public static final String KEY_HASH = "b1d50d2686248fc493b71cd490cb88ac75e71caff236fdb4ab9fa78a36319e11";
 	
@@ -124,9 +126,8 @@ public class OmoriUtil {
 	public static Set<String> getDetectedMods() {
 		Set<String> out = new HashSet<>(), seen = new HashSet<>();
 		File modFolder = new File(RPGMakerUtil.getRootAssetFolder(), "mods");
-		File gomoriFolder = new File(RPGMakerUtil.getRootAssetFolder(), "gomori");
 		
-		if(modFolder.exists() && gomoriFolder.exists()) {
+		if(modFolder.exists()) {
 			List<File> looseMods = Main.getFilesWithExts(modFolder, null, "mod.json");
 			List<File> compressedMods = Main.getFilesWithExts(modFolder, null, ".zip");
 			
